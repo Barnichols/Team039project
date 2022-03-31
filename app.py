@@ -20,9 +20,10 @@ fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
 stock_data = px.data.stocks(indexed=True)-1
 area_figs = px.area(stock_data, facet_col="company", facet_col_wrap=2)
 
-app.layout = html.Div(children=[
-    html.H1(children='Test Dash'),
-
+app.layout = html.Div([
+                html.Div([html.H1('Team 039 Project Dashboard: Home Credit Default Risk Analysis',style={'textAlign': 'center'})]),
+       html.Div(children=[dcc.Tabs([
+        dcc.Tab(label='Project Analysis', children=[
     dcc.Graph(
         id='example-graph',
         figure=fig
@@ -40,8 +41,17 @@ app.layout = html.Div(children=[
         id='areas',
         figure=area_figs,
     )
-])
+]),
 
+dcc.Tab(label='Dummy Sliders', children=[
+        dcc.Input(id="Placeholder 1", type="number", placeholder="Placeholder 1"),
+        dcc.Input(id="Placeholder 2", type="number", placeholder="Placeholder 2"),
+        dcc.Input(id="Placeholder 3", type="number", placeholder="Placeholder 3"),
+        dcc.Input(id="Placeholder 4", type="number", placeholder="Placeholder 4"),
+        dcc.Slider(0, 2000, 1, value=5,marks=None, id='my-range-slider',tooltip={"placement": "bottom", "always_visible": True}),
+        html.Hr(),
+        html.Div(id="number-out")])
+])])])
 @app.callback(
     Output("time-series-chart", "figure"),
     Input("ticker", "value"))
