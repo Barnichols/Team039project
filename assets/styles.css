@@ -1,0 +1,29 @@
+h1 {
+    padding: 20px 40px;
+    text-align: center;
+}
+
+.combo-box {
+    margin: 20px 0;
+}
+
+.form-ctn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form {
+    padding: 20px 40px;
+}
+
+.btn-ctn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#outputstate {
+    padding: 20px 40px;
+    text-align: center;
+}
