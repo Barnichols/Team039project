@@ -1,6 +1,6 @@
 # Run this app with `python app.py` and
 # visit http://127.0.0.1:8050/ in your web browser.
-
+import dash
 from dash import Dash, dcc, html, Input, Output, State
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc 
@@ -68,13 +68,8 @@ app.layout = html.Div(style={"fontFamily": ["Open Sans", "verdana", "arial", "sa
             html.H1('Team 039 Project Dashboard: Home Credit Default Risk Analysis'),
         ]),
         html.Div(children=[dcc.Tabs([
-            dcc.Tab(label='Project Analysis', children=[
-                dcc.Graph(
-                    id='mean-decrease-in-impurity',
-                    figure=fig
-                ), ]
-            ),
-    dcc.Tab(label='Dummy Sliders', children=[
+            
+    dcc.Tab(label='Model Prediction', children=[
         html.Div(
             html.H6(
                 'Here you can put the undersampling model to the test. There are three features below that you can manipulate and see how they effect your liklihood of defaulting. Try putting in your numbers and see how it goes! \nThe median values from the dataset are displayed as placeholders for reference.'
@@ -96,7 +91,8 @@ app.layout = html.Div(style={"fontFamily": ["Open Sans", "verdana", "arial", "sa
                         (
                             html.Div(children=[
                                 html.Div('DAYS_BIRTH: Client\'s age in days at the time of application'),
-                                html.Div(dcc.Input(id="DAYS_BIRTH", type="number", placeholder=13883.5,min=0))
+                                html.Div(dcc.Input(id="DAYS_BIRTH", type="number", placeholder=13883.5,min=6570
+))
                             ],
                                 className="combo-box"
                             )
@@ -110,7 +106,8 @@ app.layout = html.Div(style={"fontFamily": ["Open Sans", "verdana", "arial", "sa
                             )
                         ),
                         html.Div(children=[
-                                dbc.Button("Run Model",id='runmodel',n_clicks=0,className='me-2')
+                                dbc.Button("Run Gradient Boosting Machine Model",id='rungbm',n_clicks=0,className='me-2'),
+                                dbc.Button("Run Random Forest Classifier Model",id='runrfc',n_clicks=0,className='me-2')
                             ], className="btn-ctn"
                             ),
                         html.Div(id='outputstate', children=[]),
@@ -119,17 +116,22 @@ app.layout = html.Div(style={"fontFamily": ["Open Sans", "verdana", "arial", "sa
             className="form-ctn"
                 ),
             ]
-        ),
-    ])])])
+        ),dcc.Tab(label='Project Analysis', children=[
+            dcc.Graph(
+                id='mean-decrease-in-impurity',
+                figure=fig
+            )]
+    )])])])
 
 @app.callback(
     [Output('outputstate','children')],
-    [Input(component_id='runmodel',component_property='n_clicks')],
+    [Input(component_id='rungbm',component_property='n_clicks'),
+     Input(component_id='runrfc',component_property='n_clicks')],
     [State(component_id ='AMT_CREDIT',component_property='value' ),
      State(component_id = 'DAYS_BIRTH',component_property='value'),
      State(component_id = 'DAYS_EMPLOYED',component_property='value')]
      )
-def runmodels(nclicks, AMT_CREDIT, DAYS_BIRTH, DAYS_EMPLOYED):
+def runmodel(nclicks1,nclicks2, AMT_CREDIT, DAYS_BIRTH, DAYS_EMPLOYED):
     if AMT_CREDIT is None:
         raise PreventUpdate
     elif DAYS_BIRTH is None:
@@ -137,17 +139,22 @@ def runmodels(nclicks, AMT_CREDIT, DAYS_BIRTH, DAYS_EMPLOYED):
     elif DAYS_EMPLOYED is None:
         raise PreventUpdate
     else:
-        model = joblib.load('undersampling_RFC.pkl')
-        foo = np.array([0,193500,585000,29209.5,495000,0.020246,-13883.5,-1680.5,-4001,-3197,8,1,1,0,1,0,0,2,2,2,12,0,0,0,0,0,0,0.4984382311,0.5963049427,0.5136937663,0.0938,0.07875,0.9831,0.7688,0.0239,0,0.1379,0.1667,0.2083,0.0499,0.0756,0.08385,0,0.0028,0.0924,0.0767,0.9826,0.7713,0.0214,0,0.1379,0.1667,0.2083,0.04665,0.0808,0.0805,0,0,0.0937,0.0783,0.9831,0.7719,0.0238,0,0.1379,0.1667,0.2083,0.0502,0.077,0.08445,0,0.0021,0.0774,0,0,0,0,-967,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0])
+        if dash.callback_context.triggered[0]["prop_id"] == 'rungbm.n_clicks':
+            model = joblib.load('GBMboost.pkl')
+            mdl = 'GBM'
+        else:
+            model = joblib.load('RFC_AL.pkl')
+            mdl = 'RFC'
+            
+        foo = np.array([0.00000000e+00,  2.02500000e+05,  6.63264000e+05,  6.97770000e+04, 6.30000000e+05,  1.91010000e-02, -2.00380000e+04, -4.45800000e+03, -2.17500000e+03, -3.50300000e+03,  5.00000000e+00,  1.00000000e+00, 1.00000000e+00,  0.00000000e+00,  1.00000000e+00,  0.00000000e+00, 0.00000000e+00,  2.00000000e+00,  2.00000000e+00,  2.00000000e+00, 1.40000000e+01,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  5.06771262e-01, 6.99786830e-01,  6.10991328e-01,  9.28000000e-02,  7.81000000e-02, 9.81600000e-01,  7.55200000e-01,  2.27000000e-02,  0.00000000e+00, 1.37900000e-01,  1.66700000e-01,  2.08300000e-01,  4.83000000e-02, 7.56000000e-02,  7.70000000e-02,  0.00000000e+00,  3.80000000e-03, 8.51000000e-02,  7.70000000e-02,  9.81600000e-01,  7.58300000e-01, 2.03000000e-02,  0.00000000e+00,  1.37900000e-01,  1.66700000e-01, 2.08300000e-01,  4.62000000e-02,  8.17000000e-02,  7.51000000e-02, 0.00000000e+00,  1.20000000e-03,  9.26000000e-02,  7.78000000e-02, 9.81600000e-01,  7.58500000e-01,  2.23000000e-02,  0.00000000e+00, 1.37900000e-01,  1.66700000e-01,  2.08300000e-01,  4.88000000e-02, 7.70000000e-02,  7.76000000e-02,  0.00000000e+00,  3.10000000e-03, 7.07000000e-02,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00, -8.56000000e+02,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 1.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  1.00000000e+00,  4.00000000e+00, 1.00000000e+00,  0.00000000e+00,  0.00000000e+00,  1.00000000e+00, 0.00000000e+00,  0.00000000e+00,  1.00000000e+00,  0.00000000e+00, 1.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  1.00000000e+00, 0.00000000e+00,  1.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  1.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 1.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  1.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 1.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 1.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 0.00000000e+00,  0.00000000e+00,  0.00000000e+00,  0.00000000e+00])
         foo[2] = AMT_CREDIT
         foo[6] = -DAYS_BIRTH
         foo[7] = -DAYS_EMPLOYED
-        myans = model.predict(foo.reshape(1,-1))
-        if myans[0] == 0:
-            myans = 'Not Default!'
-        else:
-            myans = 'Default :('
-        return [f'Model predicts that you will: {myans}']
+        myans = model.predict_proba(foo.reshape(1,-1))
+        bar = dash.callback_context
+        return [f'The {mdl} model predicts that you have a {round(myans[0][1]*100,2)}% chance of defaulting']
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
